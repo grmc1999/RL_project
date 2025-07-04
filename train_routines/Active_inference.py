@@ -47,5 +47,6 @@ class ActiveInference_trainer(object):
                     # train reward and world models with memory     
                     self.Actor.train(100,self.DATA)                  
                     break
+        return reward_history
 
             
