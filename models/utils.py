@@ -172,10 +172,11 @@ class Normalizer(object):
         self.state_delta_stdev = np.sqrt(self.state_delta_sk / self.count)
 
     @staticmethod
-    def setup_vars(x, mean, stdev):
-        mean, stdev = mean.copy(), stdev.copy()
+    def setup_vars(x, mean_, stdev_):
+        mean, stdev = mean_.copy(), stdev_.copy()
         mean = torch.from_numpy(mean).float().to(x.device)
         stdev = torch.from_numpy(stdev).float().to(x.device)
+        del mean_,stdev_
         return mean, stdev
 
     def _normalize(self, x, mean, stdev):
