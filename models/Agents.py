@@ -90,7 +90,7 @@ class Planner(nn.Module):
             if self.use_exploration:
                 expl_bonus = self.measure(delta_means, delta_vars) * self.expl_scale # [T B n_can states]
                 returns += expl_bonus
-                self.trial_bonuses.append(expl_bonus)
+                #self.trial_bonuses.append(expl_bonus)
 
             if self.use_reward:
                 _states = states.view(-1, state_size)
@@ -103,7 +103,7 @@ class Planner(nn.Module):
                 )
                 rewards = rewards.mean(dim=1).sum(dim=0)
                 returns += rewards
-                self.trial_rewards.append(rewards)
+                #self.trial_rewards.append(rewards)
 
             action_mean, action_std_dev = self._fit_gaussian(actions, returns)
 
