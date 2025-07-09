@@ -107,7 +107,7 @@ class Planner(nn.Module):
 
             action_mean, action_std_dev = self._fit_gaussian(actions, returns)
 
-        return action_mean[0].squeeze(dim=0).numpy()
+        return action_mean[0].squeeze(dim=0).cpu().numpy()
 
     def perform_rollout(self, current_state, actions):
         T = self.plan_horizon + 1
