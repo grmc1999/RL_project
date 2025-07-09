@@ -191,8 +191,8 @@ class Planner(nn.Module):
                 self.reward_model.train()
 
                 self.optim.zero_grad()
-                e_loss = self.ensemble.loss(ttf(s), ttf(actions), ttf(deltas))
-                r_loss = self.reward_model.loss(ttf(s), ttf(actions), ttf(rewards))
+                e_loss = self.ensemble.loss(ttf(s).to(self.device), ttf(actions).to(self.device), ttf(deltas).to(self.device))
+                r_loss = self.reward_model.loss(ttf(s).to(self.device), ttf(actions).to(self.device), ttf(rewards).to(self.device))
                 (e_loss + r_loss).backward()
                 torch.nn.utils.clip_grad_norm_(
                     self.params, 1.0, norm_type=2
