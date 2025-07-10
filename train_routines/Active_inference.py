@@ -82,7 +82,7 @@ class ActiveInference_trainer(object):
                 learn_time = i + window_size
                 break
 
-        for e in range(50):
+        for e in range(20):
             # TODO: Reset environment
             s=self.env.reset()
             episodes.update()
