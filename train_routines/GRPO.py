@@ -25,6 +25,8 @@ class GRPO(object):
         #self.model_learning_epochs=model_learning_epochs
 
         self.transform_data=(lambda mem_mod,last_index,ep_size:rearrange(mem_mod[:last_index],"(ep steps) 1 -> ep steps 1",steps=int(ep_size)))
+        self.reverse_transform_data=(lambda mem_mod,last_index,ep_size:rearrange(mem_mod[:last_index]," ep steps 1 -> (ep steps) 1",steps=int(ep_size)))
+
     
     def train(self,episodes):
 
@@ -66,33 +68,18 @@ class GRPO(object):
                     
                     # transform memory to tensors of episodes
                     r_tensor=self.transform_data(self.DATA.r,ep_indx_2,int(ep_indx_2-ep_indx_1)) # [eps steps 1]
+                    r_tensor=(r_tensor-np.mean(r_tensor,axis=0))/(np.std(r_tensor,axis=0)+1e-5)
+                    r_tensor=self.reverse_transform_data(r_tensor,ep_indx_2,int(ep_indx_2-ep_indx_1)) # [eps*steps 1]
                     
-
-#
-                    slice=np.arange(ep_indx_1,ep_indx_2)
-                    #T=ep_indx_2-ep_indx_1
-                    ## Gather self.data
-                    ##for t in range(T-1,-1,-1):
-                    ##    new_adv_batch[t] = GAMMA * LAMBDA * (0 if t+1==T else new_adv_batch[t+1]) + new_delta_batch[t]
-                    ##    new_rtg_batch[t] = (self.DATA.r[slice][t]) if t+1==T else (GAMMA * new_rtg_batch[t+1] + self.DATA.r[slice][t])
-#
-                    #new_adv_batch[t] = GAMMA * LAMBDA * (0 if t+1==T else new_adv_batch[t+1]) + new_delta_batch[t]
-#
-                    #self.DATA.adv[slice]=new_adv_batch
-                    #self.DATA.rtg[slice]=new_rtg_batch
-
+                    slice=np.arange(ep_indx_2)
+                    self.DATA.adv[slice]=r_tensor
 
                     break
             if (e+1)%10==0 and e>0:
                 for epoch in range(EPOCHS):
                     rand_idx=np.random.choice(np.arange(len(self.DATA)),len(self.DATA))
-                    s_batch,a_p_batch,logp_batch,adv_batch,rtg_batch=self.DATA.s[rand_idx],self.DATA.a[rand_idx],self.DATA.logp[rand_idx],self.DATA.adv[rand_idx],self.DATA.rtg[rand_idx]
+                    s_batch,a_p_batch,logp_batch,adv_batch=self.DATA.s[rand_idx],self.DATA.a[rand_idx],self.DATA.logp[rand_idx],self.DATA.adv[rand_idx]
                     self.actor.update(s_batch,a_p_batch,logp_batch,adv_batch)
-
-                #for epoch in range(EPOCHS):
-                #    rand_idx=np.random.choice(np.arange(len(self.DATA)),len(self.DATA))
-                #    s_batch,a_p_batch,logp_batch,adv_batch,rtg_batch=self.DATA.s[rand_idx],self.DATA.a[rand_idx],self.DATA.logp[rand_idx],self.DATA.adv[rand_idx],self.DATA.rtg[rand_idx]
-                #    self.critic.update(s_batch,rtg_batch)
 
                 self.DATA=Memory(*self.mem_args)
 
