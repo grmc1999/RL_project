@@ -1,32 +1,33 @@
-%matplotlib inline
+
 from random import choice
 from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 from ele2364.networks import Mu, DQ,ttf
+import numpy as np
+import time
 
-EPOCHS=80
-BATCH_SIZE=200
-GAMMA=0.99
-LAMBDA=0.97
+#EPOCHS=80
+#BATCH_SIZE=200
+#GAMMA=0.99
+#LAMBDA=0.97
 
 class DDPG(object):
 
-    def __init__(self):
-        pass
-    def train():
-        env=Pendulum(Actor,Actor_target)
-        Actor=Mu(3,1)
-        Actor_target=Mu(3,1)
-        Critic=CQ(3,1)
-        Critic_target=CQ(3,1)
+    def __init__(self,actor,critic,actor_target,critic_target,gamma,environment,Memory,model_learning_epochs):
+        self.env=environment
+        self.actor=actor
+        self.actor_target=actor_target
+        self.critic=critic
+        self.critic_target=critic_target
+        self.DATA=Memory
+        self.model_learning_epochs=model_learning_epochs
+        self.gamma=gamma
 
-        Critic_target.copyfrom(Critic)
-        Actor_target.copyfrom(Actor)
-        # TODO: Create replay memory
-        DATA=Memory(3,1)
+    def train(self,episodes):
+        self.Critic_target.copyfrom(self.Critic)
+        self.Actor_target.copyfrom(self.Actor)
 
-
-        episodes=tqdm(range(150))
+        episodes=tqdm(range(episodes))
         steps=tqdm(range(1000))
         t=0
         total_reward=0
@@ -36,37 +37,37 @@ class DDPG(object):
 
         start_time = time.time()
         for e in range(len(episodes)):
-            # TODO: Reset environment
-            s=env.reset()
+            # TODO: Reset self.environment
+            s=self.env.reset()
             episodes.set_description("last episode time {t:d}, last total reward {tr:f}".format(t=t,tr=total_reward))
             episodes.update()
             total_reward=0
 
             for step in range(len(steps)):
                 # TODO: Select action (exercise 2.2)
-                a=Actor.forward(s)
-                sp, r, terminal, truncated, info = env.step(np.clip(2*a+np.random.randn(1)*0.2,-2,2))
-                DATA.add(s, a, r, sp, (terminal or truncated))
+                a=self.Actor.forward(s)
+                sp, r, terminal, truncated, info = self.env.step(np.clip(2*a+np.random.randn(1)*0.2,-2,2))
+                self.DATA.add(s, a, r, sp, (terminal or truncated))
                 s=sp
 
                 steps.set_description("step {t:d}, exploration {ef:f}, mean loss {l:f}".format(t=step,ef=0.99**e,l=total_reward))
                 steps.update()
                 total_reward=total_reward+r
 
-                s_batch, a_batch, r_batch, sp_batch, done_batch = DATA.sample(200)
+                s_batch, a_batch, r_batch, sp_batch, done_batch = self.DATA.sample(200)
                 # Update Critic
-                y= r_batch + (1 - done_batch) * GAMMA * Critic_target.forward(sp_batch,Actor_target.forward(sp_batch))
+                y= r_batch + (1 - done_batch) * self.gamma * self.Critic_target.forward(sp_batch,self.Actor_target.forward(sp_batch))
 
-                Critic.update(s=s_batch,a=a_batch,targets=y)
+                self.Critic.update(s=s_batch,a=a_batch,targets=y)
                     # Update Actor
-                Actor.update(s_batch,Critic)
-                #Critic_target.copyfrom(Critic)
-                #Actor_target.copyfrom(Actor)
+                self.Actor.update(s_batch,self.Critic)
+                #self.Critic_target.copyfrom(Critic)
+                #self.Actor_target.copyfrom(Actor)
                 #Soft update
-                for target_param, param in zip(Critic_target.parameters(), Critic.parameters()):
+                for target_param, param in zip(self.Critic_target.parameters(), self.Critic.parameters()):
                     target_param.data.copy_(target_param.data + 0.01 * (param.data - target_param.data))
 
-                for target_param, param in zip(Actor_target.parameters(), Actor.parameters()):
+                for target_param, param in zip(self.Actor_target.parameters(), self.Actor.parameters()):
                     target_param.data.copy_(target_param.data + 0.01 * (param.data - target_param.data))
 
 
@@ -86,19 +87,19 @@ class DDPG(object):
                 break
 
         for e in range(100):
-            # TODO: Reset environment
-            s=env.reset()
+            # TODO: Reset self.environment
+            s=self.env.reset()
             episodes.update()
             total_reward=0
 
             for t in range(len(steps)):
                 a=Actor.forward(s)
-                sp, r, terminal, truncated, info = env.step(2*a)
+                sp, r, terminal, truncated, info = self.env.step(2*a)
                 s=sp
                 total_reward=total_reward+r
                 if terminal or truncated:
                     test_reward_history.append(total_reward)
                     break
-        # TODO: Close environment
-        env.close()
+        # TODO: Close self.environment
+        self.env.close()
         return (end_time-start_time),learn_time,test_reward_history,reward_history,Critic,Actor
