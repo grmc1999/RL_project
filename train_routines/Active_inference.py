@@ -58,7 +58,7 @@ class ActiveInference_trainer(object):
 
                 total_reward=total_reward+r
                 if terminal or truncated:
-                    if e+1==2:
+                    if e+1==3:
                         end_time = time.time()
 
                     reward_history.append(total_reward)
