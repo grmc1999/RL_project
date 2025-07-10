@@ -31,7 +31,7 @@ class GRPO(object):
     def train(self,episodes):
 
         episodes=tqdm(range(episodes))
-        steps=tqdm(range(1000))
+        steps=tqdm(range(200))
         t=0
         total_reward=0
         T=0

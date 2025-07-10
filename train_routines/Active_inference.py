@@ -40,6 +40,7 @@ class ActiveInference_trainer(object):
             s=self.env.reset()
             episodes.set_description(
                 "last episode time {t:d}, last total reward {tr:f}, R error {re:f}, state error {se:f}".format(t=t,tr=total_reward,re=reward_loss,se=s_e_loss))
+            episodes.update()
 
             for step in range(len(steps)):
 
