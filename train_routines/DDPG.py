@@ -15,10 +15,10 @@ class DDPG(object):
 
     def __init__(self,actor,critic,actor_target,critic_target,gamma,environment,Memory,model_learning_epochs):
         self.env=environment
-        self.actor=actor
-        self.actor_target=actor_target
-        self.critic=critic
-        self.critic_target=critic_target
+        self.Actor=actor
+        self.Actor_target=actor_target
+        self.Critic=critic
+        self.Critic_target=critic_target
         self.DATA=Memory
         self.model_learning_epochs=model_learning_epochs
         self.gamma=gamma
@@ -38,7 +38,7 @@ class DDPG(object):
         start_time = time.time()
         for e in range(len(episodes)):
             # TODO: Reset self.environment
-            s=self.env.reset()
+            s=self.env.reset()[0] if isinstance(self.env.reset(),tuple) else self.env.reset()
             episodes.set_description("last episode time {t:d}, last total reward {tr:f}".format(t=t,tr=total_reward))
             episodes.update()
             total_reward=0
@@ -46,7 +46,8 @@ class DDPG(object):
             for step in range(len(steps)):
                 # TODO: Select action (exercise 2.2)
                 a=self.Actor.forward(s)
-                sp, r, terminal, truncated, info = self.env.step(np.clip(2*a+np.random.randn(1)*0.2,-2,2))
+                #print(np.round(np.clip((1+a)+np.random.randn(1)*0.2,0,2)).astype(int))
+                sp, r, terminal, truncated, info = self.env.step(np.round(np.clip((1+a)+np.random.randn(1)*0.2,0,2))[0].astype(int))
                 self.DATA.add(s, a, r, sp, (terminal or truncated))
                 s=sp
 
@@ -88,13 +89,13 @@ class DDPG(object):
 
         for e in range(100):
             # TODO: Reset self.environment
-            s=self.env.reset()
+            s=self.env.reset()[0] if isinstance(self.env.reset(),tuple) else self.env.reset()
             episodes.update()
             total_reward=0
 
             for t in range(len(steps)):
-                a=Actor.forward(s)
-                sp, r, terminal, truncated, info = self.env.step(2*a)
+                a=self.Actor.forward(s)
+                sp, r, terminal, truncated, info = self.env.step(np.round(np.clip((1+a)+np.random.randn(1)*0.2,0,2))[0].astype(int))
                 s=sp
                 total_reward=total_reward+r
                 if terminal or truncated:
@@ -102,4 +103,4 @@ class DDPG(object):
                     break
         # TODO: Close self.environment
         self.env.close()
-        return (end_time-start_time),learn_time,test_reward_history,reward_history,Critic,Actor
+        return (end_time-start_time),learn_time,test_reward_history,reward_history
