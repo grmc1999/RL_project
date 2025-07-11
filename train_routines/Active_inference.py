@@ -17,7 +17,7 @@ class ActiveInference_trainer(object):
         self.model_learning_epochs=model_learning_epochs
         #self.random_policy=lambda :np.random.uniform(0,2)
         self.random_policy=random_policy
-    def train(self,episodes,max_steps=500):
+    def train(self,episodes,test_episodes=5):
         
         episodes=tqdm(range(episodes))
         steps=tqdm(range(1000))
@@ -37,7 +37,8 @@ class ActiveInference_trainer(object):
             start_time = time.time()
             
 
-            s=self.env.reset()
+            #s=self.env.reset()
+            s=self.env.reset()[0] if isinstance(self.env.reset(),tuple) else self.env.reset()
             episodes.set_description(
                 "last episode time {t:d}, last total reward {tr:f}, R error {re:f}, state error {se:f}".format(t=t,tr=total_reward,re=reward_loss,se=s_e_loss))
             episodes.update()
@@ -46,11 +47,14 @@ class ActiveInference_trainer(object):
             for step in range(len(steps)):
 
                 if e!=0:
-                    a=self.Actor.forward(s)
-                    sp, r, terminal, truncated, info = self.env.step(a)
+                    a=np.round(np.clip(self.Actor.forward(s),0,2)).astype(int)
+                    #print(np.round(np.clip(a,0,2)).astype(int))
+                    #sp, r, terminal, truncated, info = self.env.step(a)
                 else:
-                    a=self.random_policy()
-                    sp, r, terminal, truncated, info = self.env.step(a)
+                    #a=self.random_policy()
+                    a=np.round(np.clip(self.random_policy(),0,2)).astype(int)
+                #print(a)
+                sp, r, terminal, truncated, info = self.env.step(a[0])
                 self.DATA.add(s, a, r, sp, (terminal or truncated))
                 self.normalizer.update(s,a,sp-s)
                 s=sp
@@ -59,7 +63,9 @@ class ActiveInference_trainer(object):
 
                 total_reward=total_reward+r
                 if terminal or truncated:
-                    if e+1==3:
+                    print(e)
+                    if e==5:
+                        print("take time")
                         end_time = time.time()
 
                     reward_history.append(total_reward)
@@ -82,15 +88,18 @@ class ActiveInference_trainer(object):
                 learn_time = i + window_size
                 break
 
-        for e in range(20):
+        test_episodes=tqdm(range(test_episodes))
+        for e in range(len(test_episodes)):
             # TODO: Reset environment
-            s=self.env.reset()
+            #s=self.env.reset()
+            s=self.env.reset()[0] if isinstance(self.env.reset(),tuple) else self.env.reset()
             episodes.update()
             total_reward=0
 
             for t in range(len(steps)):
-                a=self.random_policy()
-                sp, r, terminal, truncated, info = self.env.step(a)
+                #a=self.random_policy()
+                a=np.round(np.clip(self.Actor.forward(s),0,2)).astype(int)
+                sp, r, terminal, truncated, info = self.env.step(a[0])
                 s=sp
                 total_reward=total_reward+r
                 if terminal or truncated:

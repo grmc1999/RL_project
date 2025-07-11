@@ -41,7 +41,7 @@ class GRPO(object):
         start_time = time.time()
         for e in range(len(episodes)):
             # TODO: Reset environment
-            s=self.env.reset()
+            s=self.env.reset(seed=20)
             episodes.set_description("last episode time {t:d}, last total reward {tr:f}".format(t=t,tr=total_reward))
             episodes.update()
             total_reward=0
@@ -93,7 +93,7 @@ class GRPO(object):
             
         for e in range(100):
             # TODO: Reset self.environment
-            s=self.env.reset()
+            s=self.env.reset(seed=20)
             episodes.update()
             total_reward=0
 
