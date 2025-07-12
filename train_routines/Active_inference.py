@@ -1,3 +1,5 @@
+"""Training loop for the Active Inference style agent."""
+
 import numpy as np
 import time
 from ele2364 import Memory
@@ -6,6 +8,29 @@ from models.Agents import EnsembleModel,RewardModel
 from tqdm.auto import tqdm
 
 class ActiveInference_trainer(object):
+    """Trainer for the planner-based Active Inference agent.
+
+    It alternates between collecting data using a model predictive
+    controller and training an ensemble dynamics model together with a
+    reward predictor. The resulting planner is then used to roll out new
+    trajectories, allowing the agent to gradually improve its internal
+    world model.
+
+    Parameters
+    ----------
+    agent : Planner
+        Agent implementing planning and action selection.
+    environment : gym.Env
+        Environment from which transitions are collected.
+    Memory : Memory
+        Replay buffer used to store data.
+    random_policy : Callable
+        Function returning random actions for exploration.
+    normalizer : callable
+        Online normalizer applied to observations.
+    model_learning_epochs : int
+        Number of training epochs for the ensemble model per episode.
+    """
     def __init__(self, agent,environment,Memory,random_policy,normalizer,model_learning_epochs):
         #parametric model implements trainin loops and reset weights routines and computation of actions
         self.env=environment

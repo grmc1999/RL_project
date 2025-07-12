@@ -1,4 +1,4 @@
-
+"""Modified version of GRPO with additional state processing."""
 
 from random import choice
 import numpy as np
@@ -16,6 +16,22 @@ LAMBDA=0.97
 
 
 class GRPO_mod(object):
+    """Trainer for a modified GRPO algorithm with extra preprocessing.
+
+    This version reshapes experience into episode tensors and applies a
+    normalized reward signal before performing actor updates. It serves
+    as an example of how small tweaks to the data pipeline can change
+    learning behaviour.
+
+    Parameters
+    ----------
+    actor : Pi
+        Policy network to be trained.
+    environment : gym.Env
+        Environment object exposing ``reset`` and ``step``.
+    mem_args : Sequence
+        Arguments forwarded to :class:`ele2364.Memory`.
+    """
     def __init__(self,actor,environment,mem_args):
         self.env=environment
         self.actor=actor

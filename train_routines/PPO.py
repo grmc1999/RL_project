@@ -1,4 +1,4 @@
-
+"""Proximal Policy Optimization training loop."""
 
 from random import choice
 import numpy as np
@@ -15,6 +15,25 @@ LAMBDA=0.97
 
 
 class PPO(object):
+    """Trainer implementing a basic Proximal Policy Optimization loop.
+
+    The class collects transitions from the environment, computes
+    generalized advantage estimates and periodically updates the actor
+    and critic networks using minibatches sampled from an in-memory
+    buffer.  It is deliberately minimal and intended for educational
+    use rather than maximum performance.
+
+    Parameters
+    ----------
+    actor : Pi
+        Policy network used to select actions.
+    critic : V
+        Value network used for advantage estimation.
+    environment : gym.Env
+        Environment providing ``step`` and ``reset``.
+    mem_args : Sequence
+        Arguments forwarded to :class:`ele2364.Memory`.
+    """
     def __init__(self,actor,critic,environment,mem_args):
         self.env=environment
         self.actor=actor
