@@ -1,3 +1,5 @@
+"""Utility classes and functions for the RL models."""
+
 import torch
 import numpy as np
 from scipy.special import psi, gamma
@@ -5,6 +7,7 @@ from ele2364 import Memory
 from einops import rearrange, unpack
 
 class Memory_tensors(Memory):
+    """Replay buffer variant that returns tensors for each ensemble member."""
     def __init__(self,ensemble_size,**args):
         super().__init__(**args)
         self.ensemble_size=ensemble_size
@@ -29,6 +32,7 @@ class Memory_tensors(Memory):
 
 
 class InformationGain(object):
+    """Exploration bonus based on the ensemble's predictive disagreement."""
     def __init__(self, model, scale=1.0):
         self.model = model
         self.scale = scale
@@ -107,6 +111,7 @@ class InformationGain(object):
 
 
 class Normalizer(object):
+    """Online normalisation utility for states and actions."""
     def __init__(self):
         self.state_mean = None
         self.state_sk = None

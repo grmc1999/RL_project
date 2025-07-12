@@ -1,3 +1,10 @@
+"""Agent and planning utilities used by the training routines.
+
+This module contains a lightweight implementation of an MPC style planner that
+optimises sequences of actions using learned models.  The code was adapted from
+the course material and simplified for clarity.
+"""
+
 from ele2364.networks import Pi, V, ttf, tti
 from torch import nn
 from .networks import *
@@ -7,6 +14,7 @@ from einops import rearrange
 
 
 class Planner(nn.Module):
+    """Model predictive controller used to plan sequences of actions."""
     def __init__(
         self,
         ensemble,
@@ -67,6 +75,7 @@ class Planner(nn.Module):
         self.optim = torch.optim.Adam(self.params, lr=learning_rate, eps=epsilon)
 
     def forward(self, state):
+        """Plan a single action given the current state."""
 
         state = torch.from_numpy(state).float().to(self.device)
         state_size = state.size(0)
@@ -110,6 +119,7 @@ class Planner(nn.Module):
         return action_mean[0].squeeze(dim=0).cpu().numpy()
 
     def perform_rollout(self, current_state, actions):
+        """Simulate the ensemble dynamics for a sequence of actions."""
         T = self.plan_horizon + 1
         states = [torch.empty(0)] * T
         delta_means = [torch.empty(0)] * T
@@ -137,6 +147,7 @@ class Planner(nn.Module):
         return states, delta_vars, delta_means
 
     def _fit_gaussian(self, actions, returns):
+        """Fit a normal distribution to the best performing action samples."""
         returns = torch.where(torch.isnan(returns), torch.zeros_like(returns), returns)
         _, topk = returns.topk(self.top_candidates, dim=0, largest=True, sorted=False)
         best_actions = actions[:, topk.view(-1)].reshape(
@@ -149,6 +160,7 @@ class Planner(nn.Module):
         return action_mean, action_std_dev
 
     def return_stats(self):
+        """Return diagnostic statistics accumulated during planning."""
         if self.use_reward:
             reward_stats = self._create_stats(self.trial_rewards)
         else:
@@ -162,6 +174,7 @@ class Planner(nn.Module):
         return reward_stats, info_stats
 
     def _create_stats(self, arr):
+        """Helper to summarise a list of tensors."""
         tensor = torch.stack(arr)
         tensor = tensor.view(-1)
         return {
@@ -172,6 +185,7 @@ class Planner(nn.Module):
         }
     
     def train(self,n_train_epochs,memory):
+        """Train the ensemble and reward model using experience from memory."""
         e_losses = []
         r_losses = []
         n_batches = []
@@ -215,6 +229,7 @@ class Planner(nn.Module):
         )
 
     def reset_models(self):
+        """Reset network weights and optimiser state."""
         self.ensemble.reset_parameters()
         self.reward_model.reset_parameters()
         self.params = list(self.ensemble.parameters()) + list(
@@ -225,5 +240,6 @@ class Planner(nn.Module):
         )
 
     def _get_avg_loss(self, losses, n_batches, epoch):
+        """Utility to compute the average loss per epoch."""
         epoch_loss = [sum(loss) / n_batch for loss, n_batch in zip(losses, n_batches)]
         return sum(epoch_loss) / epoch

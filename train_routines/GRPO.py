@@ -1,4 +1,4 @@
-
+"""Implementation of the Gradient Reward Policy Optimization algorithm."""
 
 from random import choice
 import numpy as np
@@ -16,6 +16,22 @@ LAMBDA=0.97
 
 
 class GRPO(object):
+    """Trainer for the Gradient Reward Policy Optimization algorithm.
+
+    The trainer collects on-policy episodes and computes a simple
+    reward-based advantage signal which is then used to update the actor
+    network. The aim is to demonstrate policy gradient concepts with as
+    little overhead as possible.
+
+    Parameters
+    ----------
+    actor : Pi
+        Policy network to be trained.
+    environment : gym.Env
+        Environment that follows the Gym API.
+    mem_args : Sequence
+        Arguments used to create a :class:`ele2364.Memory` instance.
+    """
     def __init__(self,actor,environment,mem_args):
         self.env=environment
         self.actor=actor

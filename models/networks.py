@@ -1,4 +1,5 @@
 # Extracted from https://github.com/alec-tschantz/rl-inference/blob/master/pmbrl/models/models.py
+"""Neural network modules used by the agents."""
 
 import torch
 import torch.nn as nn
@@ -13,6 +14,8 @@ def swish(x):
 
 
 class EnsembleDenseLayer(nn.Module):
+    """Fully connected layer replicated over an ensemble."""
+
     def __init__(self, in_size, out_size, ensemble_size, act_fn="swish"):
         super().__init__()
         self.in_size = in_size
@@ -51,6 +54,7 @@ class EnsembleDenseLayer(nn.Module):
 
 
 class EnsembleModel(nn.Module):
+    """Dynamics model consisting of multiple networks trained in parallel."""
     def __init__(
         self,
         in_size,
@@ -147,6 +151,7 @@ class EnsembleModel(nn.Module):
 
 
 class RewardModel(nn.Module):
+    """Simple feed-forward network used to predict immediate rewards."""
     def __init__(self, in_size, hidden_size, act_fn="relu", device="cpu"):
         super().__init__()
         self.in_size = in_size
