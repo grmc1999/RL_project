@@ -23,15 +23,5 @@ trainer = PPO(actor, critic, env, mem_args)
 trainer.train(episodes=100)
 ```
 
-## Contributing
 
-This project is used for learning purposes but improvements are welcome. Please open an issue or pull request if you find a bug.
 
-## Code Style Suggestions
-
-Below are a few ideas for making the code easier to read and extend:
-
-- Introduce type hints to clarify the expected shapes of tensors.
-- Break down long functions into smaller helpers where possible.
-- Document the expected observation and action spaces for each environment.
-- Consider adopting a consistent naming convention for variables and classes.
