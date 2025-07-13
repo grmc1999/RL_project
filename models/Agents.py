@@ -183,7 +183,6 @@ class Planner(nn.Module):
             
             #for (states, actions, rewards, deltas) in self.buffer(self.batch_size):
             for i in range(len(memory)//self.batch_size):
-                #(s, actions, rewards, sp, terminal)=np.array([list(memory.sample(self.batch_size)) for _ in self.ensemble_size]) # [[bs d],[bs d],[bs d]] [es 5 bs d]
                 s, actions, rewards, sp, terminal=memory.sample(self.batch_size)
                 
                 deltas=sp - s
@@ -203,11 +202,6 @@ class Planner(nn.Module):
                 r_losses[epoch - 1].append(r_loss.item())
                 n_batches[epoch - 1] += 1
 
-            #if self.logger is not None and epoch % 20 == 0:
-            #    avg_e_loss = self._get_avg_loss(e_losses, n_batches, epoch)
-            #    avg_r_loss = self._get_avg_loss(r_losses, n_batches, epoch)
-            #    message = "> Train epoch {} [ensemble {:.2f} | reward {:.2f}]"
-            #    self.logger.log(message.format(epoch, avg_e_loss, avg_r_loss))
 
         return (
             self._get_avg_loss(e_losses, n_batches, epoch),

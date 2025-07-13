@@ -31,7 +31,7 @@ class GRPO(object):
     def train(self,episodes):
 
         episodes=tqdm(range(episodes))
-        steps=tqdm(range(200))
+        steps=tqdm(range(1000))
         t=0
         total_reward=0
         T=0
@@ -41,7 +41,8 @@ class GRPO(object):
         start_time = time.time()
         for e in range(len(episodes)):
             # TODO: Reset environment
-            s=self.env.reset(seed=20)
+            #s=self.env.reset(seed=20)
+            s=self.env.reset()[0] if isinstance(self.env.reset(),tuple) else self.env.reset()
             episodes.set_description("last episode time {t:d}, last total reward {tr:f}".format(t=t,tr=total_reward))
             episodes.update()
             total_reward=0
@@ -50,7 +51,8 @@ class GRPO(object):
                 # TODO: Select action (exercise 2.2)
                 a,logp=self.actor.forward(s)
                 #v=self.critic.forward(s)
-                sp, r, terminal, truncated, info = self.env.step(2*a)
+                #sp, r, terminal, truncated, info = self.env.step(2*a)
+                sp, r, terminal, truncated, info = self.env.step(np.round(np.clip(1+a[0],0,2)).astype(int))
                 self.DATA.add(s, a, r, sp, (terminal or truncated), logp=logp)
                 s=sp
 
@@ -93,13 +95,15 @@ class GRPO(object):
             
         for e in range(100):
             # TODO: Reset self.environment
-            s=self.env.reset(seed=20)
+            #s=self.env.reset(seed=20)
+            s=self.env.reset()[0] if isinstance(self.env.reset(),tuple) else self.env.reset()
             episodes.update()
             total_reward=0
 
             for t in range(len(steps)):
                 a,_=self.actor.forward(s)
-                sp, r, terminal, truncated, info = self.env.step(2*a)
+                sp, r, terminal, truncated, info = self.env.step(np.round(np.clip(1+a[0],0,2)).astype(int))
+                #sp, r, terminal, truncated, info = self.env.step(2*a)
                 s=sp
                 total_reward=total_reward+r
                 if terminal or truncated:
