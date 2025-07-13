@@ -1,4 +1,6 @@
 
+"""Deep Deterministic Policy Gradient training loop."""
+
 from random import choice
 from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
@@ -12,6 +14,32 @@ import time
 #LAMBDA=0.97
 
 class DDPG(object):
+    """Trainer for the Deep Deterministic Policy Gradient algorithm.
+
+    This implementation maintains target actor and critic networks and
+    performs off–policy updates from a replay buffer. It exposes only
+    the essentials needed for the course assignments so that the logic
+    behind DDPG remains clear and easy to follow.
+
+    Parameters
+    ----------
+    actor : Mu
+        Actor network to be optimised.
+    critic : DQ
+        Critic network used for Q-value estimation.
+    actor_target : Mu
+        Target network mirroring ``actor``.
+    critic_target : DQ
+        Target network mirroring ``critic``.
+    gamma : float
+        Discount factor for future rewards.
+    environment : gym.Env
+        Environment providing transitions.
+    Memory : Memory
+        Replay buffer storing transitions.
+    model_learning_epochs : int
+        Number of gradient steps per episode.
+    """
 
     def __init__(self,actor,critic,actor_target,critic_target,gamma,environment,Memory,model_learning_epochs):
         self.env=environment
