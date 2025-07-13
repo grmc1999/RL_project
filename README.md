@@ -23,5 +23,8 @@ trainer = PPO(actor, critic, env, mem_args)
 trainer.train(episodes=100)
 ```
 
+## External libraries
 
+- ele2364
+- code for Active Learning Planner is based in: https://github.com/alec-tschantz/rl-inference
 
